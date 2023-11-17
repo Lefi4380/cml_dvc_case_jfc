@@ -1,48 +1,12 @@
-name: train-my-model
-
-on: [push]
-
-jobs:
-  run:
-    runs-on: [ubuntu-latest]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup DVC
-        uses: iterative/setup-dvc@v1
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-
-      - name: Configure Git
-        run: |
-          git config --global user.email "you@example.com"
-          git config --global user.name "Your Name"
-
-      - name: DVC Pull
-        run: dvc pull data
-
-      - name: DVC Reproduce
-        run: dvc repro
-
-      - name: DVC Metrics Diff
-        run: dvc metrics diff --show-md master >> report.md
-
-      - name: DVC Plots Diff
-        run: |
-          dvc plots diff --target loss.csv --show-vega master > vega.json
-          vl2png vega.json -s 1.3 > vega.png
-          echo '![](./vega.png)' >> report.md
-
-      - name: Comment on PR with Report
-        run: cml comment create --pr --publish report.md
-        env:
-          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+stages:
+  mystage:
+    cmd: python train.py
+    deps:
+    - data
+    - train.py
+    metrics:
+    - metrics.json:
+        cache: false
+    plots:
+    - loss.csv:
+        cache: false
